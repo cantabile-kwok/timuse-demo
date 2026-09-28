@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TIMUSE Demo</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --ink: #1f2933;
+      --muted: #5c6770;
+      --card: #fffdf8;
+      --line: #e4d9c7;
+      --accent: #8c4a2f;
+      --placeholder: #efe6d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+    .banner {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--accent);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .project-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: -6px 0 24px;
+    }
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 132px;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      text-decoration: none;
+    }
+    .project-link.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .project-link.primary:hover {
+      background: #713923;
+      border-color: #713923;
+    }
+    .project-link.disabled {
+      color: #8b8f93;
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+    .project-link svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: 0.02em;
+    }
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+    p { margin: 0 0 16px; }
+    .note {
+      padding: 12px 14px;
+      border-left: 3px solid var(--accent);
+      background: var(--card);
+      color: var(--muted);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+    }
+    h2 {
+      margin: 36px 0 12px;
+      font-size: 22px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 36px;
+    }
+    .section-head h2 { margin: 0; }
+    .spectrogram-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .spectrogram-toggle input {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+    }
+    th {
+      background: #f3e8d7;
+      font-weight: 600;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #faf6ee; }
+    .sample-id {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    audio {
+      display: block;
+      width: 100%;
+      min-width: 240px;
+      height: 34px;
+    }
+    .spectrogram-panel {
+      position: relative;
+      display: none;
+      width: 100%;
+      min-width: 240px;
+      margin-top: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #17131c;
+      line-height: 0;
+    }
+    .show-spectrograms .spectrogram-panel { display: block; }
+    .spectrogram-panel img {
+      display: block;
+      width: 100%;
+      height: 86px;
+      object-fit: fill;
+    }
+    .spectrogram-playhead {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+      transform: translateX(-1px);
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .pagination button {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+    }
+    .pagination button:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .pagination button.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .pagination button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+    footer {
+      margin-top: 36px;
+      color: var(--muted);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+    }
+    @media (max-width: 720px) {
+      main { padding: 28px 12px 48px; }
+      h1 { font-size: 28px; }
+      th, td { padding: 10px 8px; }
+      audio { min-width: 220px; }
+      .section-head { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="banner">Audio demo</div>
+    <h1>TIMUSE</h1>
+    <p class="subtitle">Text-Initialized Masked Semantic Token Modeling for Universal Speech Enhancement</p>
+    <div class="project-links">
+      <a class="project-link primary"
+         href="https://github.com/cantabile-kwok/timuse/tree/main"
+         target="_blank"
+         rel="noopener noreferrer">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.94 10.94 0 0 1 5.75 0c2.19-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.15v3.26c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/>
+        </svg>
+        Code
+      </a>
+      <span class="project-link disabled"
+            aria-disabled="true"
+            title="arXiv link coming soon">
+        arXiv (coming soon)
+      </span>
+    </div>
+    <p>
+      Selected examples from the URGENT 2026 test set. For each
+      utterance, compare the degraded input with AnyEnhance, SenSE, and TIMUSE.
+    </p>
+    <p class="note">
+      For a fair comparison, all columns use lossless mono 24 kHz FLAC files.
+      Headphones are recommended. Mel spectrograms can be
+      shown with the switch below; the white line follows playback.
+    </p>
+
+    <div class="section-head">
+      <h2>Listening examples</h2>
+      <label class="spectrogram-toggle">
+        <input type="checkbox" data-target="system-table-wrap">
+        Show Mel spectrograms
+      </label>
+    </div>
+    <div class="table-wrap" id="system-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Degraded input</th>
+            <th>AnyEnhance baseline</th>
+            <th>SenSE baseline</th>
+            <th>TIMUSE enhanced</th>
+            <th>Clean reference</th>
+          </tr>
+        </thead>
+        <tbody id="system-table-body">
+          <tr>
+            <td class="sample-id">fileid_5</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_5.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_37</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_37.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_101</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_101.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_144</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_144.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_177</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_177.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_254</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_254.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_288</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_288.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_315</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_315.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_361</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_361.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_512</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_512.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_672</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_672.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_712</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_712.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_760</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_760.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_954</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_954.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_990</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/anyenhance/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/sense/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_990.flac"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav class="pagination"
+         data-target="system-table-body"
+         aria-label="Listening examples pages"></nav>
+
+    <div class="section-head">
+      <h2>Controlled study</h2>
+      <label class="spectrogram-toggle">
+        <input type="checkbox" data-target="controlled-table-wrap">
+        Show Mel spectrograms
+      </label>
+    </div>
+    <p>
+      Comparison under the same training dataset and recipe, isolating the
+      effect of model design from differences in training data and degradation
+      simulation.
+    </p>
+    <div class="table-wrap" id="controlled-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th>Degraded input</th>
+            <th>Controlled AnyEnhance</th>
+            <th>Controlled UDSE</th>
+            <th>Controlled SenSE</th>
+            <th>TIMUSE</th>
+            <th>Clean reference</th>
+          </tr>
+        </thead>
+        <tbody id="controlled-table-body">
+          <tr>
+            <td class="sample-id">fileid_5</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_5.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_5.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_37</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_37.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_37.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_101</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_101.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_101.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_144</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_144.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_144.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_177</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_177.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_177.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_254</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_254.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_254.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_288</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_288.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_288.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_315</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_315.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_315.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_361</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_361.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_361.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_512</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_512.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_512.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_672</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_672.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_672.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_712</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_712.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_712.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_760</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_760.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_760.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_954</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_954.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_954.flac"></audio></td>
+          </tr>
+          <tr>
+            <td class="sample-id">fileid_990</td>
+            <td><audio controls preload="none" src="audio/noisy/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_anyenhance/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_udse/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/controlled_sense/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/timuse/fileid_990.flac"></audio></td>
+            <td><audio controls preload="none" src="audio/clean/fileid_990.flac"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav class="pagination"
+         data-target="controlled-table-body"
+         aria-label="Controlled study pages"></nav>
+
+    <footer>
+      TIMUSE audio demo for ICASSP 2027.
+    </footer>
+  </main>
+  <script>
+    function attachSpectrogram(audio) {
+      if (audio.dataset.spectrogramAttached) return;
+
+      const panel = document.createElement("div");
+      panel.className = "spectrogram-panel";
+
+      const image = document.createElement("img");
+      image.loading = "lazy";
+      image.alt = `Mel spectrogram for ${audio.src.split("/").pop()}`;
+      image.src = audio.getAttribute("src")
+        .replace(/^audio\//, "spectrograms/")
+        .replace(/\.flac$/, ".png") + "?v=mel1";
+
+      const playhead = document.createElement("span");
+      playhead.className = "spectrogram-playhead";
+
+      panel.append(image, playhead);
+      audio.insertAdjacentElement("afterend", panel);
+      audio.dataset.spectrogramAttached = "true";
+
+      const updatePlayhead = () => {
+        const progress = audio.duration ? audio.currentTime / audio.duration : 0;
+        playhead.style.left = `${Math.min(1, Math.max(0, progress)) * 100}%`;
+      };
+      audio.addEventListener("timeupdate", updatePlayhead);
+      audio.addEventListener("loadedmetadata", updatePlayhead);
+      audio.addEventListener("ended", updatePlayhead);
+    }
+
+    document.querySelectorAll(".spectrogram-toggle input").forEach((toggle) => {
+      const target = document.getElementById(toggle.dataset.target);
+      const players = [...target.querySelectorAll("audio")];
+      toggle.addEventListener("change", () => {
+        if (toggle.checked) players.forEach(attachSpectrogram);
+        target.classList.toggle("show-spectrograms", toggle.checked);
+      });
+    });
+
+    document.querySelectorAll(".pagination").forEach((pagination) => {
+      const tbody = document.getElementById(pagination.dataset.target);
+      const rows = [...tbody.rows];
+      const pageSize = 5;
+      const pageCount = Math.ceil(rows.length / pageSize);
+      let currentPage = 1;
+
+      function renderPage(page) {
+        currentPage = Math.min(pageCount, Math.max(1, page));
+        rows.forEach((row, index) => {
+          const visible = Math.floor(index / pageSize) + 1 === currentPage;
+          row.hidden = !visible;
+          if (!visible) row.querySelectorAll("audio").forEach((audio) => audio.pause());
+        });
+
+        pagination.replaceChildren();
+        const addButton = (label, destination, options = {}) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = label;
+          button.disabled = options.disabled ?? false;
+          if (options.current) {
+            button.classList.add("active");
+            button.setAttribute("aria-current", "page");
+          }
+          button.addEventListener("click", () => renderPage(destination));
+          pagination.append(button);
+        };
+
+        addButton("Previous", currentPage - 1, { disabled: currentPage === 1 });
+        for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+          addButton(String(pageNumber), pageNumber, {
+            current: pageNumber === currentPage
+          });
+        }
+        addButton("Next", currentPage + 1, {
+          disabled: currentPage === pageCount
+        });
+      }
+
+      renderPage(1);
+    });
+  </script>
+</body>
+</html>
