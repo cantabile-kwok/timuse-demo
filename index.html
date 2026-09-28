@@ -135,10 +135,11 @@
       cursor: pointer;
     }
     table {
-      width: 100%;
-      border-collapse: collapse;
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
       background: var(--card);
-      border: 1px solid var(--line);
     }
     th, td {
       padding: 14px 12px;
@@ -154,6 +155,28 @@
     }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: #faf6ee; }
+    .table-wrap :is(th, td):nth-child(-n + 2) {
+      position: sticky;
+      z-index: 1;
+    }
+    .table-wrap thead th:nth-child(-n + 2) {
+      z-index: 2;
+      background: #f3e8d7;
+    }
+    .table-wrap tbody td:nth-child(-n + 2) {
+      background: var(--card);
+    }
+    .table-wrap tbody tr:hover td:nth-child(-n + 2) {
+      background: #faf6ee;
+    }
+    .table-wrap :is(th, td):first-child {
+      left: 0;
+      white-space: nowrap;
+    }
+    .table-wrap :is(th, td):nth-child(2) {
+      left: var(--frozen-sample-width, 108px);
+      box-shadow: 8px 0 8px -8px rgba(31, 41, 51, 0.55);
+    }
     .sample-id {
       color: var(--muted);
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -198,6 +221,7 @@
     }
     .table-wrap {
       overflow-x: auto;
+      border: 1px solid var(--line);
       border-radius: 8px;
     }
     .pagination {
@@ -644,6 +668,18 @@
       audio.addEventListener("loadedmetadata", updatePlayhead);
       audio.addEventListener("ended", updatePlayhead);
     }
+
+    function syncFrozenColumns() {
+      document.querySelectorAll(".table-wrap").forEach((wrap) => {
+        const sampleHeader = wrap.querySelector("thead th:first-child");
+        if (!sampleHeader) return;
+        wrap.style.setProperty("--frozen-sample-width", `${sampleHeader.offsetWidth}px`);
+      });
+    }
+
+    syncFrozenColumns();
+    window.addEventListener("resize", syncFrozenColumns);
+    if (document.fonts) document.fonts.ready.then(syncFrozenColumns);
 
     document.querySelectorAll(".spectrogram-toggle input").forEach((toggle) => {
       const target = document.getElementById(toggle.dataset.target);
