@@ -302,9 +302,7 @@
       </span>
     </div>
     <p>
-      Selected examples from the URGENT 2026 test set. For each
-      utterance, compare the degraded input with AnyEnhance, SenSE,
-      Metis-SE, and TIMUSE.
+      Some examples from the multilingual URGENT 2026 non-blind test set.
     </p>
     <p class="note">
       For a fair comparison, all columns use lossless mono 24 kHz FLAC files.
@@ -317,12 +315,18 @@
     </p>
 
     <div class="section-head">
-      <h2>Listening examples</h2>
+      <h2>System-level Comparison</h2>
       <label class="spectrogram-toggle">
         <input type="checkbox" data-target="system-table-wrap">
         Show Mel spectrograms
       </label>
     </div>
+    <p>
+      Comparison using the officially released checkpoints for all baselines.
+      Since the systems differ in training data, degradation simulation, and
+      training recipes, this is not a strictly controlled method-level comparison,
+      but rather an overall indication of their relative performance.
+    </p>
     <div class="table-wrap" id="system-table-wrap">
       <table>
         <thead>
