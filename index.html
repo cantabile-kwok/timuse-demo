@@ -153,6 +153,14 @@
       background: #f3e8d7;
       font-weight: 600;
     }
+    .method-link {
+      color: inherit;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 3px;
+    }
+    .method-link:hover {
+      color: var(--accent);
+    }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: #faf6ee; }
     .table-wrap :is(th, td):nth-child(-n + 2) {
@@ -303,7 +311,9 @@
       Headphones are recommended. Mel spectrograms can be
       shown with the switch below; the white line follows playback.
       <br>
-      Note that the clean reference is not necessarily "clean"; it is the source of simulation in URGENT 2026.
+      For this subjective listening demo, 16 kHz baselines such as LLaSE-G1 and UniSE are omitted because differences in sampling rate can noticeably affect perceived audio quality. This does not affect the objective evaluation reported in the paper, where all metrics are computed on 16 kHz resampled audio.
+      <br>
+      Note that the audio in the “Clean reference” column is taken directly from URGENT 2026. Although used as the source signal for degradation simulation, it is not necessarily perceptually clean.
     </p>
 
     <div class="section-head">
@@ -319,9 +329,9 @@
           <tr>
             <th>Sample</th>
             <th>Degraded input</th>
-            <th>AnyEnhance</th>
-            <th>SenSE</th>
-            <th>Metis-SE</th>
+            <th><a class="method-link" href="https://github.com/viewfinder-annn/AnyEnhance-v1" target="_blank" rel="noopener noreferrer">AnyEnhance</a></th>
+            <th><a class="method-link" href="https://github.com/ASLP-lab/SenSE" target="_blank" rel="noopener noreferrer">SenSE</a></th>
+            <th><a class="method-link" href="https://github.com/open-mmlab/Amphion/tree/main/models/tts/metis" target="_blank" rel="noopener noreferrer">Metis-SE</a></th>
             <th>TIMUSE (ours)</th>
             <th>Clean reference</th>
           </tr>
@@ -487,9 +497,9 @@
           <tr>
             <th>Sample</th>
             <th>Degraded input</th>
-            <th>AnyEnhance</th>
-            <th>UDSE</th>
-            <th>SenSE</th>
+            <th><a class="method-link" href="https://github.com/viewfinder-annn/AnyEnhance-v1" target="_blank" rel="noopener noreferrer">AnyEnhance</a></th>
+            <th><a class="method-link" href="https://github.com/fliu215/UDSE_Code" target="_blank" rel="noopener noreferrer">UDSE</a></th>
+            <th><a class="method-link" href="https://github.com/ASLP-lab/SenSE" target="_blank" rel="noopener noreferrer">SenSE</a></th>
             <th>TIMUSE (ours)</th>
             <th>Clean reference</th>
           </tr>
