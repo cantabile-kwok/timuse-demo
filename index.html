@@ -84,6 +84,13 @@
       height: 16px;
       fill: currentColor;
     }
+    .project-link svg.paper-icon {
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
     h1 {
       margin: 0 0 8px;
       font-size: 34px;
@@ -295,10 +302,14 @@
         </svg>
         Code
       </a>
-      <a class="project-link"
+      <a class="project-link primary"
          href="https://arxiv.org/abs/2610.34814"
          target="_blank"
          rel="noopener noreferrer">
+        <svg class="paper-icon" aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M7 3.5h6.5L18 8v12.5H7Z"/>
+          <path d="M13.5 3.5V8H18M9.75 12.25l4.5 4.5m0-4.5-4.5 4.5"/>
+        </svg>
         arXiv
       </a>
     </div>
